@@ -81,4 +81,46 @@ class TwentyQuestions(Task):
                                                                 "word": game["word"]})
 
         dataset.check_consistency()
-        return dataset 
+        return dataset
+        
+class CarDealer(Task):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.max_horizon = 20  # Can adjust based on your data
+
+    def setup(self, stage: str):
+        self.dataset = self.read_data()
+        print(f"Loaded {len(self.dataset)} examples from car-dealer dataset.")
+
+    def read_data(self):
+        import json
+        from Dataset import TrajectoryDataset
+
+        with open("datasets/train.json", "r") as f:
+            data = json.load(f)
+
+        dataset = TrajectoryDataset()
+
+        for convo in data:
+            history = ""
+            lines = convo.get("lines", [])
+            for idx, turn in enumerate(lines):
+                observation = history.strip()
+                action = turn["text"].strip()
+                reward = float(turn.get("purchase_prob", 0))
+                done = idx == len(lines) - 1
+
+                dataset.append_observation_action_reward(
+                    observation=observation,
+                    action=action,
+                    reward=reward
+                )
+                history += f"{turn['role']}: {turn['text']}\n"
+
+            dataset.append_terminal_observation(
+                final_observation=history.strip(),
+                trajectory_info={"buyer_info": convo.get("buyer_info", {})}
+            )
+
+        dataset.check_consistency()
+        return dataset
