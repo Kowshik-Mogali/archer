@@ -1,7 +1,7 @@
 # main.py
 from lightning.pytorch.cli import LightningCLI
 from Algorithms import BehaviouralCloning, ActorCritic
-from Tasks import TwentyQuestions
+from Tasks import TwentyQuestions,CarDealer
 
 def cli_main():
     cli = LightningCLI(save_config_kwargs={"overwrite": True})
